@@ -1,0 +1,22 @@
+{
+  "name": "nutria_server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx tsx index.ts",
+    "dev" : "npx genkit start -- npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@genkit-ai/googleai": "^1.8.0",
+    "dotenv": "^16.5.0",
+    "genkit": "^1.8.0"
+  },
+  "devDependencies": {
+    "genkit-cli": "^1.8.0"
+  }
+}
