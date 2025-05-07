@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">NutrIA</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">Iniciar sesión</string>
+    <string name="email_label">Correo electrónico</string>
+    <string name="password_label">Contraseña</string>
+    <string name="login_button">Iniciar sesión</string>
+    <string name="no_account_text">¿No tienes una cuenta? Regístrate</string>
+
+    <!-- Signup Screen -->
+    <string name="signup_title">Registrarse</string>
+    <string name="confirm_password_label">Confirmar contraseña</string>
+    <string name="next_button">Siguiente</string>
+    <string name="already_have_account">¿Ya tienes una cuenta? Iniciar sesión</string>
+
+    <!-- Profile Form Screen -->
+    <string name="additional_info_title">Información adicional</string>
+    <string name="additional_info_message">
+        Necesitamos esta información para ofrecer recomendaciones de comidas y recetas adaptadas a tus necesidades.
+    </string>
+    <string name="name_label">Nombre</string>
+    <string name="height_label">Altura (cm)</string>
+    <string name="weight_label">Peso inicial (kg)</string>
+    <string name="dob_label">Fecha de nacimiento</string>
+    <string name="gender_label">Género</string>
+    <string name="diseases_label">Enfermedades (separadas por comas)</string>
+    <string name="allergies_label">Alergias (separadas por comas)</string>
+    <string name="finish_button">Finalizar</string>
+
+    <string name="weekly_plan">Plan semanal</string>
+    <string name="chat">Chat</string>
+    <string name="recipes">Recetas</string>
+    <string name="account_settings">Cuenta</string>
+
+    <!-- Chat Screen -->
+    <string name="chat_topbar_title">Chat de NutrIA</string>
+    <string name="chat_greeting">
+        👋 ¡Hola! Soy NutrIA, tu coach de nutrición con IA. Puedo crear planes de comidas personalizados, sugerir recetas saludables y responder cualquier pregunta sobre nutrición. ¿En qué puedo ayudarte hoy?
+    </string>
+    <string name="chat_hint">Escribe un mensaje…</string>
+    <string name="chat_send">Enviar</string>
+
+    <!-- Sugerencias rápidas -->
+    <string name="suggestion_meal_plan">Crear un plan de comidas semanal</string>
+    <string name="suggestion_recipe_ingredients">Recetas con pollo y brócoli</string>
+    <string name="suggestion_nutrition_tips">Consejos para más proteína</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="signup">Crear Cuenta</string>
+    <string name="profile_form">Datos Personales</string>
+    <string name="recipe_detail">Receta Completa</string>
+
+</resources>
