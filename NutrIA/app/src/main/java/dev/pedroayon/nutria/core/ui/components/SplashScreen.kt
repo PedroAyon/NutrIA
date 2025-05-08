@@ -33,23 +33,9 @@ fun SplashScreen() {
             Image(
                 painter = painterResource(id = R.mipmap.ic_launcher_foreground),
                 contentDescription = stringResource(R.string.app_name),
-                modifier = Modifier.size(250.dp)
+                modifier = Modifier.size(280.dp)
             )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.app_description),
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-
-            )
-            Spacer(Modifier.height(32.dp))
-            CircularProgressIndicator()
+//            CircularProgressIndicator()
         }
     }
 }
