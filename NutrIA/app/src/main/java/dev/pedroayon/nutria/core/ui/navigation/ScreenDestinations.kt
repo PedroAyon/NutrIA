@@ -14,31 +14,27 @@ sealed class ScreenDestination(
     val labelRes: Int,
     val icon: @Composable () -> Unit
 ) {
-    object Chat : ScreenDestination(
+    data object Chat : ScreenDestination(
         AppDestinations.CHAT,
         R.string.chat,
         { Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null) }
     )
 
-    object WeeklyPlan : ScreenDestination(
+    data object WeeklyPlan : ScreenDestination(
         AppDestinations.WEEKLY,
         R.string.weekly_plan,
         { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) }
     )
 
-    object Recipes : ScreenDestination(
+    data object Recipes : ScreenDestination(
         AppDestinations.RECIPES,
         R.string.recipes,
         { Icon(Icons.Default.Book, contentDescription = null) }
     )
 
-    object Account : ScreenDestination(
+    data object Account : ScreenDestination(
         AppDestinations.ACCOUNT,
         R.string.account_settings,
         { Icon(Icons.Default.Person, contentDescription = null) }
     )
-//
-//    companion object {
-//        val bottomItems = listOf(Chat, WeeklyPlan, Recipes, Account)
-//    }
 }

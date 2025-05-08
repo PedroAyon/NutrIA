@@ -1,74 +1,98 @@
 package dev.pedroayon.nutria.auth.ui
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
+import android.app.Activity
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import dev.pedroayon.nutria.R
+import dev.pedroayon.nutria.auth.presentation.AuthViewModel
+import dev.pedroayon.nutria.auth.domain.model.AuthState
+import dev.pedroayon.nutria.auth.ui.components.GoogleAuthButton
+
+private const val TAG = "LoginScreen"
 
 @Composable
 fun LoginScreen(
-    onLogin: () -> Unit,
-    onNavigateToSignup: () -> Unit
+    viewModel: AuthViewModel,
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = stringResource(R.string.login_title),
-            style = MaterialTheme.typography.headlineMedium
-        )
+    val context = LocalContext.current
+    val activity = context as? Activity
 
-        Spacer(Modifier.height(24.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text(stringResource(R.string.email_label)) },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text(stringResource(R.string.password_label)) },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation()
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        Button(
-            onClick = { onLogin() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.login_button))
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.no_account_text),
+    Scaffold(modifier = Modifier.padding(32.dp)) { innerPadding ->
+        Column(
             modifier = Modifier
-                .clickable { onNavigateToSignup() }
-                .padding(8.dp)
-        )
+                .fillMaxSize()
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(1f)
+            ) {
+                Image(
+                    painter = painterResource(id = R.mipmap.ic_launcher_foreground), // TODO: Replace with your actual logo resource ID
+                    contentDescription = stringResource(R.string.app_name),
+                    modifier = Modifier.size(180.dp)
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                GoogleAuthButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    isLoading = uiState is AuthState.LoadingGoogle || uiState is AuthState.LoadingFirebase,
+                    onClicked = {
+                        if (activity != null) {
+                            viewModel.triggerGoogleSignIn(activity)
+                        } else {
+                            Log.e(TAG, "Activity context not available to trigger Google Sign In")
+                            // Optionally, set an error state in the ViewModel
+                            // viewModel.handleCredentialError(IllegalStateException("LoginScreen requires an Activity context..."))
+                        }
+                    }
+                )
+
+                if (uiState is AuthState.Error) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Error: ${(uiState as AuthState.Error).exception?.message ?: "Unknown error"}",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
     }
 }
