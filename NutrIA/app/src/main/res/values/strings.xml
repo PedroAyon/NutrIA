@@ -49,5 +49,7 @@
     <string name="signup">Crear Cuenta</string>
     <string name="profile_form">Datos Personales</string>
     <string name="recipe_detail">Receta Completa</string>
+    <string name="continue_with_google">Continuar con Google</string>
+    <string name="loading">Cargando...</string>
 
 </resources>
