@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">NutrIA</string>
+    <string name="app_description">Tu asistente personal de cocina y nutrición</string>
 
     <!-- Login Screen -->
     <string name="login_title">Iniciar sesión</string>

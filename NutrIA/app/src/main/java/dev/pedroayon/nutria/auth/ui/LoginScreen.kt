@@ -15,7 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,10 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.pedroayon.nutria.R
-import dev.pedroayon.nutria.auth.presentation.AuthViewModel
 import dev.pedroayon.nutria.auth.domain.model.AuthState
+import dev.pedroayon.nutria.auth.presentation.AuthViewModel
 import dev.pedroayon.nutria.auth.ui.components.GoogleAuthButton
 
 private const val TAG = "LoginScreen"
@@ -56,12 +56,20 @@ fun LoginScreen(
                 Image(
                     painter = painterResource(id = R.mipmap.ic_launcher_foreground), // TODO: Replace with your actual logo resource ID
                     contentDescription = stringResource(R.string.app_name),
-                    modifier = Modifier.size(180.dp)
+                    modifier = Modifier.size(250.dp)
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
                     text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineLarge
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.app_description),
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+
                 )
             }
 
