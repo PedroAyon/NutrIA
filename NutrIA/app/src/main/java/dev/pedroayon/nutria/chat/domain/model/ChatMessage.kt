@@ -1,4 +1,4 @@
-package dev.pedroayon.nutria.chat.ui.domain.model
+package dev.pedroayon.nutria.chat.domain.model
 
 data class ChatMessage(
     val text: String,

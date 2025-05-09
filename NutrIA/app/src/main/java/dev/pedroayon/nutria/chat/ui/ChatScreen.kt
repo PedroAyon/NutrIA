@@ -8,12 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -30,6 +30,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,10 +38,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.pedroayon.nutria.R
-import dev.pedroayon.nutria.chat.ui.domain.model.ChatMessage
+import dev.pedroayon.nutria.chat.domain.model.ChatMessage
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -49,18 +51,19 @@ fun ChatScreen() {
     val hintText = stringResource(id = R.string.chat_hint)
     val sendDesc = stringResource(id = R.string.chat_send)
     val suggestions = listOf(
-        R.string.suggestion_meal_plan,
-        R.string.suggestion_recipe_ingredients,
-        R.string.suggestion_nutrition_tips
+        "Crear un plan de alimentación",
+        "Recetas con pollo y brócoli",
+        "Consejos para más proteinas"
     )
 
-    // Estado
     var currentInput by remember { mutableStateOf("") }
     val messages = remember {
         mutableStateListOf(
-            ChatMessage(text = greetingText, isUser = false)
+            ChatMessage(text = greetingText, isUser = false, suggestedMessages = suggestions)
         )
     }
+
+    val listState = rememberLazyListState()
 
     Scaffold(
         topBar = {
@@ -98,7 +101,8 @@ fun ChatScreen() {
                 IconButton(
                     onClick = {
                         if (currentInput.isNotBlank()) {
-                            messages += ChatMessage(currentInput, isUser = true)
+                            val newUserMessage = ChatMessage(currentInput, isUser = true)
+                            messages.add(newUserMessage)
                             currentInput = ""
                             // TODO: enviar a la lógica del chatbot
                         }
@@ -118,6 +122,7 @@ fun ChatScreen() {
                 .padding(innerPadding)
         ) {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 8.dp)
@@ -132,6 +137,11 @@ fun ChatScreen() {
                         MaterialTheme.colorScheme.primary
                     else
                         MaterialTheme.colorScheme.surfaceVariant
+
+                    val textColor = if (msg.isUser)
+                        Color.White
+                    else
+                        MaterialTheme.colorScheme.onSurface
 
                     Box(
                         modifier = Modifier
@@ -148,30 +158,32 @@ fun ChatScreen() {
                                 text = msg.text,
                                 modifier = Modifier.padding(12.dp),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = textColor
                             )
                         }
                     }
-                }
-
-                item {
-                    Spacer(Modifier.height(8.dp))
-
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(4.dp)
-                    ) {
-                        suggestions.forEach { resId ->
-                            val text = stringResource(id = resId)
-                            AssistChip(
-                                onClick = { currentInput = text },
-                                label = { Text(text) }
-                            )
+                    if (!msg.suggestedMessages.isNullOrEmpty()) {
+                        FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(4.dp)
+                        ) {
+                            msg.suggestedMessages.forEach { text ->
+                                AssistChip(
+                                    onClick = { currentInput = text },
+                                    label = { Text(text) }
+                                )
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(index = messages.size - 1)
         }
     }
 }
