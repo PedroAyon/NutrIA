@@ -1,22 +1,32 @@
 {
-  "name": "nutria_server",
+  "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "start": "npx tsx index.ts",
-    "dev" : "npx genkit start -- npm start",
+    "dev": "npx ts-node main.ts",
+    "genkit": "npx genkit start -- npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "@genkit-ai/googleai": "^1.8.0",
     "dotenv": "^16.5.0",
-    "genkit": "^1.8.0"
+    "express": "^5.1.0",
+    "genkit": "^1.8.0",
+    "multer": "^2.0.0",
+    "sequelize": "^6.37.7",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "genkit-cli": "^1.8.0"
-  }
+    "@types/express": "^5.0.2",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.15.21",
+    "@types/sequelize": "^4.28.20",
+    "genkit-cli": "^1.8.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "description": ""
 }

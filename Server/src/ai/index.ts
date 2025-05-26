@@ -1,0 +1,17 @@
+import { googleAI } from "@genkit-ai/googleai";
+import { genkit } from "genkit";
+import { extractUserIntention } from "./flows/extractUserIntention";
+import { defineExtractIngredientsFlow } from "./flows/extractIngredientsFromPicture";
+import { defineGenerateRecipeFlow } from "./flows/generateRecipe";
+import { defineAnswerQuestionFlow } from "./flows/answerQuestion";
+
+const ai = genkit({
+  plugins: [googleAI()],
+  model: googleAI.model("gemini-2.0-flash"),
+});
+
+export const extractUserIntentionFlow = extractUserIntention(ai);
+export const extractIngredientsFlow = defineExtractIngredientsFlow(ai);
+export const generateRecipeFlow = defineGenerateRecipeFlow(ai);
+export const answerQuestion = defineAnswerQuestionFlow(ai);
+export default ai;
