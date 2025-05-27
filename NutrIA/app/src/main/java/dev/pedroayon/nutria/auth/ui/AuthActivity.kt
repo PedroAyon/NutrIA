@@ -1,10 +1,12 @@
 package dev.pedroayon.nutria.auth.ui
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -12,6 +14,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -21,9 +25,10 @@ import dev.pedroayon.nutria.auth.domain.model.AuthState
 import dev.pedroayon.nutria.auth.domain.repository.AuthRepository
 import dev.pedroayon.nutria.auth.presentation.AuthViewModel
 import dev.pedroayon.nutria.auth.presentation.AuthViewModelFactory
-import dev.pedroayon.nutria.core.ui.components.SplashScreen
-import dev.pedroayon.nutria.core.ui.navigation.AppNavHost
-import dev.pedroayon.nutria.core.ui.theme.NutriIATheme
+import dev.pedroayon.nutria.common.ui.components.SplashScreen
+import dev.pedroayon.nutria.common.ui.navigation.AppNavHost
+import dev.pedroayon.nutria.common.ui.theme.NutriIATheme
+import androidx.core.graphics.drawable.toDrawable
 
 
 class AuthActivity : ComponentActivity() {
@@ -38,9 +43,12 @@ class AuthActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         authRepository = AuthRepositoryImpl(FirebaseAuth.getInstance(), applicationContext)
-
         setContent {
             NutriIATheme {
+                if (isSystemInDarkTheme()) window.setBackgroundDrawable(
+                    MaterialTheme.colorScheme.background.toArgb().toDrawable()
+                )
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -55,6 +63,7 @@ class AuthActivity : ComponentActivity() {
                                     popUpTo("splash") { inclusive = true }
                                 }
                             }
+
                             AuthState.Unauthenticated, AuthState.Idle -> {
                                 if (navController.currentDestination?.route == "splash") {
                                     navController.navigate("login") {
@@ -62,6 +71,7 @@ class AuthActivity : ComponentActivity() {
                                     }
                                 }
                             }
+
                             is AuthState.Error -> {
                                 val exception = (uiState as AuthState.Error).exception
                                 Toast.makeText(
@@ -76,6 +86,7 @@ class AuthActivity : ComponentActivity() {
                                     }
                                 }
                             }
+
                             AuthState.InitialCheck, AuthState.LoadingGoogle, AuthState.LoadingFirebase -> {
                                 // Stay on current screen
                             }

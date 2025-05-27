@@ -35,7 +35,7 @@
     <string name="account_settings">Cuenta</string>
 
     <!-- Chat Screen -->
-    <string name="chat_topbar_title">Chat de NutrIA</string>
+    <string name="chat_topbar_title">NutrIA Chat</string>
     <string name="chat_greeting">
         👋 ¡Hola! Soy NutrIA, tu coach de nutrición con IA. Puedo crear planes de comidas personalizados, sugerir recetas saludables y responder cualquier pregunta sobre nutrición. ¿En qué puedo ayudarte hoy?
     </string>
@@ -52,5 +52,6 @@
     <string name="recipe_detail">Receta Completa</string>
     <string name="continue_with_google">Continuar con Google</string>
     <string name="loading">Cargando...</string>
+    <string name="logout">Cerrar Sesión</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package dev.pedroayon.nutria.core.ui.theme
+package dev.pedroayon.nutria.common.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

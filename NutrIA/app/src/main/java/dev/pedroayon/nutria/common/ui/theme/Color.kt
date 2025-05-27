@@ -1,4 +1,4 @@
-package dev.pedroayon.nutria.core.ui.theme
+package dev.pedroayon.nutria.common.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

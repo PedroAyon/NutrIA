@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    kotlin("plugin.serialization") version "1.9.23" // Must match Kotlin version
 }
 
 android {
@@ -69,7 +70,13 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
     implementation("com.exyte:animated-navigation-bar:1.0.0")
     implementation("androidx.appcompat:appcompat:1.3.1")
+    implementation("com.meetup:twain:0.2.2")
+    implementation("com.github.popovanton0:heart-switch:1.6.0")
+    implementation("com.airbnb.android:lottie-compose:6.0.0")
+
 
 }

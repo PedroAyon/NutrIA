@@ -1,4 +1,4 @@
-package dev.pedroayon.nutria.core.ui.components
+package dev.pedroayon.nutria.common.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
