@@ -29,9 +29,9 @@
     <string name="allergies_label">Alergias (separadas por comas)</string>
     <string name="finish_button">Finalizar</string>
 
-    <string name="weekly_plan">Plan semanal</string>
     <string name="chat">Chat</string>
     <string name="recipes">Recetas</string>
+    <string name="shopping_list">Lista de compras</string>
     <string name="account_settings">Cuenta</string>
 
     <!-- Chat Screen -->

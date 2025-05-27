@@ -23,9 +23,8 @@ fun AppNavHost() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(ScreenDestination.Chat.route) { ChatScreen() }
-            composable(ScreenDestination.WeeklyPlan.route) { /* WeeklyPlanScreen() */ }
             composable(ScreenDestination.Recipes.route) { /* RecipesScreen() */ }
-            composable(ScreenDestination.Account.route) { /* AccountSettingsScreen() */ }
+            composable(ScreenDestination.ShoppingList.route) { /* RecipesScreen() */ }
         }
     }
 
