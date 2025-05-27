@@ -1,10 +1,10 @@
 import {
-  answerQuestion,
-  extractIngredientsFlow,
   extractUserIntentionFlow,
-  generateRecipeFlow,
 } from "../ai";
 import { ChatHistoryType, UserActions, UserIntention } from "../types";
+import { handleGenerateRecipe } from "./generateRecipe";
+import { handleQuestion } from "./question";
+import { extractIngredientsFromPictures } from "./utils";
 
 export async function handleUserMessage(
   chatHistory: ChatHistoryType,
@@ -14,19 +14,13 @@ export async function handleUserMessage(
   try {
     const { intention } = await extractUserIntentionFlow({ chatHistory });
     console.log("Extracted intention:", intention);
-    const pictureIngredients: string[] = [];
-    if (picturePaths.length > 0) {
-      console.log("User uploaded pictures:", picturePaths);
-      for (const picturePath of picturePaths) {
-        console.log("Extracting ingredients from picture:", picturePath);
-        const extracted = await extractIngredientsFlow({
-          imageURL: picturePath,
-        });
-        console.log("Extracted ingredients:", extracted.ingredients);
-        pictureIngredients.push(...extracted.ingredients);
-      }
-    }
 
+    const pictureIngredients = await extractIngredientsFromPictures(
+      picturePaths
+    );
+    
+
+    // Get last message from the user
     const sortedHistory = [...chatHistory].sort((a, b) => a.id - b.id);
 
     const lastUserMessage = [...sortedHistory]
@@ -36,27 +30,12 @@ export async function handleUserMessage(
     if (!lastUserMessage) {
       throw new Error("No user prompt found in chat history.");
     }
-    console.log("Last user message:", lastUserMessage.text);
 
     switch (intention) {
       case UserActions.QUESTION:
-        const message = await answerQuestion({
-          chatHistory: sortedHistory,
-        });
-
-        return {
-          message: message,
-        };
+        return await handleQuestion(sortedHistory);
       case UserActions.GENERATE_RECIPE:
-        let requirements = `User requirements: ${lastUserMessage.text}`;
-        if (pictureIngredients.length > 0) {
-          requirements += `\nUser added one or more pictures, extracted ingredients from pictures: ${pictureIngredients.join(", ")}`;
-        }
-        const recipe = await generateRecipeFlow({ requirements: requirements})
-        return {
-          message: "Recipe generated successfully",
-          recipe,
-        };
+        return await handleGenerateRecipe(lastUserMessage, pictureIngredients);
       case UserActions.MODIFY_RECIPE:
         // Handle recipe modification
         console.log("User wants to modify a recipe.");

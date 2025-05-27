@@ -60,7 +60,7 @@ export const UserIntention = z.object({
       - ${UserActions.MODIFY_RECIPE}: User wants to modify an existing recipe.
       - ${UserActions.DELETE_RECIPE}: User wants to delete a recipe.
       - ${UserActions.ALTER_SHOPPING_LIST}: User wants to alter the shopping list.
-      - ${UserActions.QUESTION}: User has a question about nutrition or cooking, or something else related to food.
+      - ${UserActions.QUESTION}: User has a question about nutrition or cooking, or something else related to food, or asking about what the AI assitant can do.
       - ${UserActions.UNKNOWN}: User's intention is not clear or does not match any known actions. This is the default value if the user is not asking for something the AI is designed to do.`),
 });
 

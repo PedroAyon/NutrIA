@@ -3,12 +3,12 @@ import fs from "fs";
 import path from "path";
 import { ChatHistory, ChatHistoryType } from "../types";
 import { upload } from "../config/multer";
-import { handleUserMessage } from "../core/handleUserMessage";
+import { handleUserMessage } from "../core";
 
 const router = express.Router();
 
 router.post(
-  "/send",
+  "/message/send",
   upload.array("photos"),
   async (req: Request, res: Response) => {
     let chatHistory: ChatHistoryType;

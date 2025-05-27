@@ -34,13 +34,13 @@ export function defineAnswerQuestionFlow(aiInstance: any) {
           },
         ],
         system:
-          "You are a helpful assistant that answers questions about nutrition and cooking. Provide a clear and concise answer to the user's question.",
+          "You are a helpful assistant called NutrIA, who answers questions about nutrition and cooking, suggest healthy food recipes even with the ingridients the user asks for, or extracting the ingredients from a picture, like the fridge or pantry contents. Provide a clear and concise answer to the user's question. You must answer naturally in a human way. Answerin the user's language.",
       });
 
-      if (text == null || typeof text !== 'string') {
+      if (text == null || typeof text !== "string") {
         throw new Error("Response doesn't satisfy schema.");
       }
-      
+
       return text;
     }
   );

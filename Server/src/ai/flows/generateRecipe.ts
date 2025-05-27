@@ -29,7 +29,7 @@ export function defineGenerateRecipeFlow(aiInstance: any) {
           },
         ],
         system:
-          "You are a helpful assistant that suggests healthy food recipes (when possible) based on requirements or ingredients. Answer in the language of the user requirements.",
+          "You are a helpful assistant that suggests healthy food recipes (when possible) based on requirements or ingredients. Answer in the language of the user requirements. Answer in the user's language.",
         output: { schema: Recipe },
       });
       if (output == null) {
