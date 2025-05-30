@@ -104,7 +104,7 @@ fun RecipeBookScreen(navController: NavController) {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(start = 12.dp, top = 12.dp, end = 32.dp, bottom = 12.dp),
+                                .padding(start = 12.dp, top = 12.dp, end = 48.dp, bottom = 12.dp),
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
