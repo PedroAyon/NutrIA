@@ -4,6 +4,7 @@ import { extractUserIntention } from "./flows/extractUserIntention";
 import { defineExtractIngredientsFlow } from "./flows/extractIngredientsFromPicture";
 import { defineGenerateRecipeFlow } from "./flows/generateRecipe";
 import { defineAnswerQuestionFlow } from "./flows/answerQuestion";
+import { extractRecipeGenerationRequirementsFlow } from "./flows/extractRecipeGenerationRequierements";
 
 const ai = genkit({
   plugins: [googleAI()],
@@ -14,4 +15,5 @@ export const extractUserIntentionFlow = extractUserIntention(ai);
 export const extractIngredientsFlow = defineExtractIngredientsFlow(ai);
 export const generateRecipeFlow = defineGenerateRecipeFlow(ai);
 export const answerQuestion = defineAnswerQuestionFlow(ai);
+export const extractRecipeGenerationRequirements = extractRecipeGenerationRequirementsFlow(ai);
 export default ai;

@@ -73,5 +73,27 @@ router.delete("/recipe/:id", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/recipes", async (req: Request, res: Response) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Missing or invalid auth token" });
+    return;
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+
+  try {
+    const recipes = await Recipe.findAll({
+      where: { userId: token },
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json({ recipes });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 
 export default router;

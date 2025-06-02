@@ -1,19 +1,30 @@
-import { generateRecipeFlow } from "../ai";
-import { MessageType, UserActions } from "../types";
+import { extractRecipeGenerationRequirements, generateRecipeFlow } from "../ai";
+import { ChatHistoryType, UserIntentionType } from "../types";
 
 export async function handleGenerateRecipe(
-  lastUserMessage: MessageType,
-  pictureIngredients: string[]
+  chatHistory: ChatHistoryType,
+  pictureIngredients: string[],
+  action: UserIntentionType,
+  userId: string
 ) {
-  let requirements = `User requirements: ${lastUserMessage.text}`;
+  let requirements = "";
+  if (action == UserIntentionType.GENERATE_RECIPE) {
+    requirements = await extractRecipeGenerationRequirements({ chatHistory, userId });
+
+  } else {
+    requirements = await extractRecipeGenerationRequirements({
+      chatHistory,
+      userId,
+      modifyingRecipe: true,
+    });
+  }
+
   if (pictureIngredients.length > 0) {
-    requirements += `\nUser added one or more pictures, extracted ingredients from pictures: ${pictureIngredients.join(
-      ", "
-    )}`;
+    requirements += `\nUser added one or more pictures, you have to consider this extracted ingredients from pictures for your recipe: ${pictureIngredients.join(", ")}`;
   }
   const recipe = await generateRecipeFlow({ requirements: requirements });
   return {
-    actionPerformed: UserActions.GENERATE_RECIPE,
+    actionPerformed: UserIntentionType.GENERATE_RECIPE,
     recipe,
   };
 }

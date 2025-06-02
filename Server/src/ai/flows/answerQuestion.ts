@@ -1,5 +1,5 @@
 import { z } from "genkit";
-import { ChatHistory, ChatHistoryType, UserIntention } from "../../types";
+import { ChatHistory, ChatHistoryType } from "../../types";
 
 export function defineAnswerQuestionFlow(aiInstance: any) {
   return aiInstance.defineFlow(
@@ -11,14 +11,15 @@ export function defineAnswerQuestionFlow(aiInstance: any) {
       outputSchema: z.string(),
     },
     async ({ chatHistory }: { chatHistory: ChatHistoryType }) => {
-      const sortedHistory = [...chatHistory].sort((a, b) => a.id - b.id);
+      const sortedHistory = chatHistory.slice().sort((a, b) => a.id - b.id);
 
-      const lastUserMessage = [...sortedHistory]
+      const lastUserMessage = sortedHistory
+        .slice()
         .reverse()
         .find((msg) => msg.role === "user");
 
       if (!lastUserMessage) {
-        throw new Error("No user prompt found in chat history.");
+        throw new Error("No user message found in chat history.");
       }
 
       const formattedHistory = sortedHistory
@@ -28,16 +29,27 @@ export function defineAnswerQuestionFlow(aiInstance: any) {
       const { text } = await aiInstance.generate({
         prompt: [
           {
-            text: `Answer the user's question based on the provided user prompt and the chat history (sorted from older to newer).
-                    User prompt: ${lastUserMessage.text}
-                    Chat history: ${formattedHistory}`,
+            text: `A user has asked a question related to nutrition or cooking.
+
+Your task is to provide a helpful and concise answer based on the latest user question and the full context of the conversation.
+
+User question: ${lastUserMessage.text}
+
+Full chat history for context:
+${formattedHistory}
+`,
           },
         ],
-        system:
-          "You are a helpful assistant called NutrIA, who answers questions about nutrition and cooking, suggest healthy food recipes even with the ingridients the user asks for, or extracting the ingredients from a picture, like the fridge or pantry contents. Provide a clear and concise answer to the user's question. You must answer naturally in a human way. Answerin the user's language.",
+        system: `You are NutrIA, a helpful AI assistant that specializes in nutrition and cooking.
+
+- Answer clearly and naturally, like a human.
+- Provide practical and healthy suggestions when relevant.
+- You may use ingredients the user mentions or infers from pictures.
+- Always respond in the user's language.
+- Keep your tone warm, friendly, and informative.`,
       });
 
-      if (text == null || typeof text !== "string") {
+      if (!text || typeof text !== "string") {
         throw new Error("Response doesn't satisfy schema.");
       }
 

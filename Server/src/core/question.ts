@@ -1,5 +1,5 @@
 import { answerQuestion } from "../ai";
-import { ChatHistoryType, UserActions } from "../types";
+import { ChatHistoryType, UserIntentionType } from "../types";
 
 export async function handleQuestion(chatHistory: ChatHistoryType) {
   const message = await answerQuestion({
@@ -7,7 +7,7 @@ export async function handleQuestion(chatHistory: ChatHistoryType) {
   });
 
   return {
-    actionPerformed: UserActions.QUESTION,
+    actionPerformed: UserIntentionType.QUESTION,
     message: message,
   };
 }

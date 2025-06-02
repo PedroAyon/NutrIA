@@ -37,10 +37,9 @@ export const GenerateRecipeInput = z
 export type GenerateRecipeInputType = z.infer<typeof GenerateRecipeInput>;
 
 
-export enum UserActions {
+export enum UserIntentionType {
   GENERATE_RECIPE = "ACTION_GENERATE_RECIPE",
   MODIFY_RECIPE = "ACTION_MODIFY_RECIPE",
-  DELETE_RECIPE = "ACTION_DELETE_RECIPE",
   ALTER_SHOPPING_LIST = "ACTION_ALTER_SHOPPING_LIST",
   QUESTION = "ACTION_QUESTION_ABOUT_NUTRITION_OR_COOKING",
   UNKNOWN = "ACTION_UNKNOWN",
@@ -48,20 +47,18 @@ export enum UserActions {
 
 export const UserIntention = z.object({
   intention: z.enum([
-    UserActions.GENERATE_RECIPE,
-    UserActions.MODIFY_RECIPE,
-    UserActions.DELETE_RECIPE,
-    UserActions.ALTER_SHOPPING_LIST,
-    UserActions.QUESTION,
-    UserActions.UNKNOWN,
+    UserIntentionType.GENERATE_RECIPE,
+    UserIntentionType.MODIFY_RECIPE,
+    UserIntentionType.ALTER_SHOPPING_LIST,
+    UserIntentionType.QUESTION,
+    UserIntentionType.UNKNOWN,
   ])
     .describe(`The user's intention based on the chat history. Possible values are:
-      - ${UserActions.GENERATE_RECIPE}: User wants to generate a recipe.
-      - ${UserActions.MODIFY_RECIPE}: User wants to modify an existing recipe.
-      - ${UserActions.DELETE_RECIPE}: User wants to delete a recipe.
-      - ${UserActions.ALTER_SHOPPING_LIST}: User wants to alter the shopping list.
-      - ${UserActions.QUESTION}: User has a question about nutrition or cooking, or something else related to food, or asking about what the AI assitant can do.
-      - ${UserActions.UNKNOWN}: User's intention is not clear or does not match any known actions. This is the default value if the user is not asking for something the AI is designed to do.`),
+      - ${UserIntentionType.GENERATE_RECIPE}: User wants to generate a recipe.
+      - ${UserIntentionType.MODIFY_RECIPE}: User wants to modify an existing recipe.
+      - ${UserIntentionType.ALTER_SHOPPING_LIST}: User wants to alter the shopping list.
+      - ${UserIntentionType.QUESTION}: User has a question about nutrition or cooking, or something else related to food, or asking about what the AI assitant can do.
+      - ${UserIntentionType.UNKNOWN}: User's intention is not clear or does not match any known actions. This is the default value if the user is not asking for something the AI is designed to do.`),
 });
 
 
@@ -93,7 +90,7 @@ export const Message = z.object({
   role: z
     .enum(["user", "assistant"])
     .describe("The role of the message sender."),
-  text: z.string().describe("The content of the message."),
+  text: z.string().describe("The content of the message.").optional(),
   imagePaths: z.array(z.string()).optional(),
   recipe: Recipe.optional().describe(
     "The recipe associated with the message, if applicable."

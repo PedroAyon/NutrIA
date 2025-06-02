@@ -11,7 +11,7 @@ export function defineGenerateRecipeFlow(aiInstance: any) {
           .string()
           .optional()
           .describe(
-            "Requirements for the recipe, e.g., 'low-carb', 'vegetarian', or indication to use specific ingridients."
+            "Requirements for the recipe to make or edit."
           ),
       }),
       outputSchema: Recipe,

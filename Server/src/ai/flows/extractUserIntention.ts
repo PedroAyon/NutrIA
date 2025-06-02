@@ -11,9 +11,7 @@ export function extractUserIntention(aiInstance: any) {
       outputSchema: UserIntention,
     },
     async ({ chatHistory }: { chatHistory: ChatHistoryType }) => {
-      const sortedHistory = [...chatHistory].sort((a, b) => a.id - b.id);
-
-      const lastUserMessage = [...sortedHistory]
+      const lastUserMessage = [...chatHistory]
         .reverse()
         .find((msg) => msg.role === "user");
 
@@ -21,27 +19,35 @@ export function extractUserIntention(aiInstance: any) {
         throw new Error("No user prompt found in chat history.");
       }
 
-      const formattedHistory = sortedHistory
-        .map((msg) => `${msg.role}: ${msg.text}`)
+      const formattedHistory = chatHistory
+        .map((msg) => `${msg.role.toUpperCase()}: ${msg.text}`)
         .join("\n");
 
       const { output } = await aiInstance.generate({
         prompt: [
           {
-            text: `Extract the user's intention from the provided user prompt and the chat history (sorted from older to newer).
-                    User prompt: ${lastUserMessage.text}
-                    Chat history: ${formattedHistory}`,
+            text: `You are given a chat history between a user and an assistant.
+Your task is to extract the user's **current intention** based on their last message, using the full context of the conversation.
+
+Chat history (from oldest to newest):
+${formattedHistory}
+
+Based on the last user message: "${lastUserMessage.text}", what is the user's intention?`,
           },
         ],
-        system:
-          "You are part of a multiagent system with a chatbot to help with nutrition and cooking. You are a utility tool that extracts the user's intention from their last message. This intention is the action the user wants to perform.",
+        system: `You are a classification agent in a nutrition and cooking assistant system.
+Your only job is to identify the user's intention from their most recent message and context.
+
+Be cautious not to misclassify — if the user's intent is vague or unrelated, return ACTION_UNKNOWN.`,
         output: {
           schema: UserIntention,
         },
       });
-      if (output == null) {
-        throw new Error("Response doesn't satisfy schema.");
+
+      if (!output) {
+        throw new Error("Failed to extract intention: no valid output.");
       }
+
       return output;
     }
   );

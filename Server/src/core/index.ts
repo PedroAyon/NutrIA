@@ -1,15 +1,13 @@
-import {
-  extractUserIntentionFlow,
-} from "../ai";
-import { ChatHistoryType, UserActions, UserIntention } from "../types";
+import { extractUserIntentionFlow } from "../ai";
+import { ChatHistoryType, UserIntentionType, UserIntention } from "../types";
 import { handleGenerateRecipe } from "./generateRecipe";
 import { handleQuestion } from "./question";
-import { extractIngredientsFromPictures } from "./utils";
+import { extractIngredientsFromPictures } from "./picture";
 
 export async function handleUserMessage(
   chatHistory: ChatHistoryType,
   picturePaths: string[],
-  authToken: string
+  userId: string
 ) {
   try {
     const { intention } = await extractUserIntentionFlow({ chatHistory });
@@ -18,37 +16,26 @@ export async function handleUserMessage(
     const pictureIngredients = await extractIngredientsFromPictures(
       picturePaths
     );
-    
 
     // Get last message from the user
     const sortedHistory = [...chatHistory].sort((a, b) => a.id - b.id);
 
-    const lastUserMessage = [...sortedHistory]
-      .reverse()
-      .find((msg) => msg.role === "user");
-
-    if (!lastUserMessage) {
-      throw new Error("No user prompt found in chat history.");
-    }
-
     switch (intention) {
-      case UserActions.QUESTION:
+      case UserIntentionType.QUESTION:
         return await handleQuestion(sortedHistory);
-      case UserActions.GENERATE_RECIPE:
-        return await handleGenerateRecipe(lastUserMessage, pictureIngredients);
-      case UserActions.MODIFY_RECIPE:
-        // Handle recipe modification
-        console.log("User wants to modify a recipe.");
-        break;
-      case UserActions.DELETE_RECIPE:
-        // Handle recipe deletion
-        console.log("User wants to delete a recipe.");
-        break;
-      case UserActions.ALTER_SHOPPING_LIST:
+      case UserIntentionType.GENERATE_RECIPE:
+      case UserIntentionType.MODIFY_RECIPE:
+        return await handleGenerateRecipe(
+          chatHistory,
+          pictureIngredients,
+          intention,
+          userId
+        );
+      case UserIntentionType.ALTER_SHOPPING_LIST:
         // Handle shopping list alteration
         console.log("User wants to alter the shopping list.");
         break;
-      case UserActions.UNKNOWN:
+      case UserIntentionType.UNKNOWN:
         return {
           message: "I cannot respond to this message.",
         };
@@ -62,7 +49,7 @@ export async function handleUserMessage(
       chatHistory,
       intention,
       picturePaths,
-      authToken,
+      authToken: userId,
     };
   } catch (err: any) {
     console.error("Error handling user interaction:", err);
