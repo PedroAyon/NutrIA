@@ -1,8 +1,8 @@
 package dev.pedroayon.nutria.chat.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,10 +13,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,123 +37,102 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.google.firebase.auth.FirebaseAuth
+import com.google.gson.Gson
 import dev.pedroayon.nutria.R
 import dev.pedroayon.nutria.auth.domain.model.MessageType
 import dev.pedroayon.nutria.chat.domain.model.ChatMessage
+import dev.pedroayon.nutria.chat.domain.model.Message
+import dev.pedroayon.nutria.chat.domain.model.MessageRole
 import dev.pedroayon.nutria.chat.ui.components.ChatBottomBar
 import dev.pedroayon.nutria.chat.ui.components.MessageBubble
+import dev.pedroayon.nutria.common.data.ApiService
+import dev.pedroayon.nutria.common.data.ShoppingListManager
 import dev.pedroayon.nutria.common.ui.components.CommonTopBar
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.atomic.AtomicInteger
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+// --- API Service Setup (Simple) ---
+object ApiClient {
+    private const val BASE_URL = "https://direct-kodiak-grateful.ngrok-free.app"
+
+    val gson: Gson = Gson()
+
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY // Use BODY for dev, NONE for production
+    }
+
+    private val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .build()
+
+    val instance: ApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(ApiService::class.java)
+    }
+}
+// --- End API Service Setup ---
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen() {
     val hintText = stringResource(id = R.string.chat_hint)
     val coroutineScope = rememberCoroutineScope()
     var isBotTyping by remember { mutableStateOf(false) }
     var currentInput by remember { mutableStateOf("") }
-    val messages = remember {
-        // mockup data
-        val recipeJsonString = """
-        {
-            "calories": 450,
-            "description": "Un plato nutritivo y fácil de preparar, ideal para una comida rápida y saludable.",
-            "ingredients": [
-                {
-                    "name": "Espinacas",
-                    "quantity": "2",
-                    "unit": "tazas"
-                },
-                {
-                    "name": "Tomates",
-                    "quantity": "1",
-                    "unit": "mediano"
-                },
-                {
-                    "name": "Huevos",
-                    "quantity": "2",
-                    "unit": "grandes"
-                },
-                {
-                    "name": "Hummus",
-                    "quantity": "2",
-                    "unit": "cucharadas"
-                },
-                {
-                    "name": "Pan de linaza germinado",
-                    "quantity": "2",
-                    "unit": "rebanadas"
-                },
-                {
-                    "name": "Queso Mozzarella",
-                    "quantity": "30",
-                    "unit": "gramos"
-                }
-            ],
-            "instructions": [
-                {
-                    "description": "Prepara los ingredientes",
-                    "instructions": "Lava y corta los tomates en rodajas. Lava las espinacas. Ralla el queso mozzarella.",
-                    "step": 1,
-                    "duration": "5 minutos"
-                },
-                {
-                    "description": "Cocina los huevos",
-                    "instructions": "Bate los huevos y cocínalos en una sartén antiadherente hasta que estén revueltos o en forma de tortilla, según tu preferencia.",
-                    "step": 2,
-                    "duration": "5 minutos"
-                },
-                {
-                    "description": "Tuesta el pan",
-                    "instructions": "Mientras se cocinan los huevos, tuesta las rebanadas de pan de linaza germinado.",
-                    "step": 3,
-                    "duration": "3 minutos"
-                },
-                {
-                    "description": "Arma el sándwich",
-                    "instructions": "Unta hummus en ambas rebanadas de pan tostado. Coloca las espinacas, las rodajas de tomate y los huevos cocidos sobre una de las rebanadas. Espolvorea el queso mozzarella rallado por encima. Cubre con la otra rebanada de pan.",
-                    "step": 4,
-                    "duration": "2 minutos"
-                },
-                {
-                    "description": "Sirve",
-                    "instructions": "Corta el sándwich por la mitad si lo deseas y sírvelo inmediatamente.",
-                    "step": 5,
-                    "duration": "1 minuto"
-                }
-            ],
-            "name": "Sándwich Saludable de Huevo, Espinacas y Hummus",
-            "prepTime": "15 minutos"
+    val context = LocalContext.current
+    val shoppingListManager = remember { ShoppingListManager(context) }
+
+    // Observe the shopping list from the manager
+    val currentShoppingListForApi by shoppingListManager.shoppingListFlow.collectAsState()
+
+    val messages = remember { mutableStateListOf<ChatMessage>() }
+    val apiChatHistory = remember { mutableStateListOf<Message>() }
+    val apiMessageIdCounter = remember { AtomicInteger(0) }
+
+    // State to hold the Firebase User ID, formatted as "Bearer <UID>"
+    var userIdAsBearerToken by remember { mutableStateOf<String?>(null) }
+
+    // --- CRITICAL CHANGE: Fetch UID and format it as Bearer token ---
+    LaunchedEffect(Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val uid = user.uid
+            userIdAsBearerToken = "Bearer $uid" // FORCING UID AS BEARER TOKEN
+            Log.d("ChatScreen", "Firebase User ID (UID) formatted as Bearer token: $userIdAsBearerToken")
+        } else {
+            Log.e("ChatScreen", "Firebase User is null. User might not be logged in.")
+            // Handle case where user is not logged in (e.g., navigate to login)
         }
-    """
-        mutableStateListOf(
-            ChatMessage(
-                text = "¿Quién eres? ¿Qué puedes hacer?".trim(),
-                messageType = MessageType.USER
-            ),
-            ChatMessage(
-                text = "Soy NutrIA, tu asistente de nutrición y cocina. Puedo responder preguntas sobre nutrición, sugerir recetas saludables incluso con los ingredientes que tengas, o extraer los ingredientes de una foto, como el contenido de tu nevera o despensa. ¡Estoy aquí para ayudarte a comer mejor y de forma más fácil!\n".trim(),
+
+        // Initial message from bot if list is empty
+        if (messages.isEmpty()) {
+            val initialBotMessage = ChatMessage(
+                text = "Soy NutrIA, tu asistente de nutrición y cocina. ¿Cómo puedo ayudarte hoy?",
                 messageType = MessageType.BOT
-            ),
-            ChatMessage(
-                text = "¿Puedo usar espinaca en lugar de lechuga en una ensalada?".trim(),
-                messageType = MessageType.USER
-            ),
-            ChatMessage(
-                text = "¡Por supuesto! La espinaca es una excelente alternativa a la lechuga en una ensalada. De hecho, es más nutritiva que muchos tipos de lechuga, ya que es rica en vitaminas y minerales. ¡Anímate a probarla!\n".trim(),
-                messageType = MessageType.BOT
-            ),
-            ChatMessage(
-                text = "No se que preparar hoy, recomiéndame algo, te mando foto de mi refri y mi alacena".trim(),
-                messageType = MessageType.USER
-            ),
-            ChatMessage(
-                text = recipeJsonString.trim(),
-                messageType = MessageType.RECIPE
-            ),
-        )
+            )
+            messages.add(initialBotMessage)
+            apiChatHistory.add(
+                Message(
+                    id = apiMessageIdCounter.getAndIncrement(),
+                    role = MessageRole.ASSISTANT,
+                    text = initialBotMessage.text
+                )
+            )
+        }
     }
+    // --- End CRITICAL CHANGE ---
 
     val listState = rememberLazyListState()
 
@@ -176,24 +158,107 @@ fun ChatScreen() {
                 onInputChange = { currentInput = it },
                 onSendClick = {
                     if (currentInput.isNotBlank()) {
-                        val newUserMessage = ChatMessage(currentInput, messageType = MessageType.USER)
-                        messages.add(newUserMessage)
-                        val userInput = currentInput
+                        val userInputText = currentInput
+                        val userChatMessage = ChatMessage(text = userInputText, messageType = MessageType.USER)
+                        messages.add(userChatMessage)
+
+                        apiChatHistory.add(
+                            Message(
+                                id = apiMessageIdCounter.getAndIncrement(),
+                                role = MessageRole.USER,
+                                text = userInputText
+                            )
+                        )
+
                         currentInput = ""
                         isBotTyping = true
 
                         coroutineScope.launch {
-                            delay(5000)
-                            val botReply = ChatMessage("bot response", messageType = MessageType.BOT)
-                            messages.add(botReply)
-                            isBotTyping = false
+                            // Ensure userIdAsBearerToken is available before making the API call
+                            if (userIdAsBearerToken == null) {
+                                Log.e("ChatScreenAPI", "Cannot send message: User ID as Bearer token is null.")
+                                messages.add(ChatMessage(text = "Lo siento, no pude autenticarte. Por favor, reinicia la app.", messageType = MessageType.BOT))
+                                isBotTyping = false
+                                return@launch
+                            }
+
+                            try {
+                                val chatHistoryJson = ApiClient.gson.toJson(apiChatHistory.toList())
+                                val chatHistoryRequestBody = chatHistoryJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+
+                                val shoppingListJson = ApiClient.gson.toJson(currentShoppingListForApi)
+                                val shoppingListRequestBody = shoppingListJson.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+
+                                val photoParts: List<MultipartBody.Part> = emptyList()
+
+                                // --- CRITICAL CHANGE: Pass userIdAsBearerToken here ---
+                                val response = ApiClient.instance.sendMessage(
+                                    token = userIdAsBearerToken!!, // Pass the UID formatted as Bearer token
+                                    photos = photoParts,
+                                    chatHistory = chatHistoryRequestBody,
+                                    shoppingList = shoppingListRequestBody
+                                )
+                                // --- End CRITICAL CHANGE ---
+
+                                if (response.isSuccessful) {
+                                    response.body()?.let { botResponse ->
+                                        var botMessageTextForApi: String? = null
+                                        var botRecipeForApi: dev.pedroayon.nutria.common.model.Recipe? = null
+
+                                        if (botResponse.recipe != null) {
+                                            val recipeMessage = ChatMessage(
+                                                text = botResponse.recipe.toString(),
+                                                messageType = MessageType.RECIPE,
+                                                recipe = botResponse.recipe
+                                            )
+                                            messages.add(recipeMessage)
+                                            botRecipeForApi = botResponse.recipe
+                                            botMessageTextForApi = "Aquí tienes una receta: ${botResponse.recipe.name}"
+                                        }
+                                        if (botResponse.shoppingList != null) {
+                                            shoppingListManager.saveShoppingList(botResponse.shoppingList)
+                                            val shoppingListText = "Tu lista de compras actualizada:\n" +
+                                                    botResponse.shoppingList.joinToString("\n") { "- $it" }
+                                            messages.add(ChatMessage(text = shoppingListText, messageType = MessageType.BOT))
+                                            if (botMessageTextForApi == null) botMessageTextForApi = shoppingListText else botMessageTextForApi += "\n" + shoppingListText
+                                        }
+                                        if (botResponse.message != null) {
+                                            messages.add(ChatMessage(text = botResponse.message, messageType = MessageType.BOT))
+                                            if (botMessageTextForApi == null) botMessageTextForApi = botResponse.message else botMessageTextForApi += "\n" + botResponse.message
+                                        }
+
+                                        if (botMessageTextForApi != null || botRecipeForApi != null) {
+                                            apiChatHistory.add(
+                                                Message(
+                                                    id = apiMessageIdCounter.getAndIncrement(),
+                                                    role = MessageRole.ASSISTANT,
+                                                    text = botMessageTextForApi,
+                                                    recipe = botRecipeForApi
+                                                )
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                                    Log.e("ChatScreenAPI", "Error sending message: ${response.code()} - $errorBody")
+                                    messages.add(ChatMessage(text = "Lo siento, ocurrió un error al procesar tu solicitud. Código: ${response.code()}", messageType = MessageType.BOT))
+                                    apiChatHistory.add(Message(id = apiMessageIdCounter.getAndIncrement(), role = MessageRole.ASSISTANT, text = "Error response from server: $errorBody"))
+                                }
+                            } catch (e: Exception) {
+                                Log.e("ChatScreenAPI", "Exception sending message: ${e.message}", e)
+                                messages.add(ChatMessage(text = "Lo siento, no pude conectarme. Verifica tu conexión.", messageType = MessageType.BOT))
+                            } finally {
+                                isBotTyping = false
+                            }
                         }
                     }
-                }
-
-
-,
-                onCameraClick = {},
+                },
+                onCameraClick = {
+                    Log.d("ChatScreen", "Camera icon clicked - implement image handling.")
+                    coroutineScope.launch {
+                        messages.add(ChatMessage(text = "La función de cámara aún no está implementada.", messageType = MessageType.BOT))
+                    }
+                },
                 hintText = hintText,
             )
         },
@@ -209,25 +274,87 @@ fun ChatScreen() {
                     .weight(1f)
                     .padding(horizontal = 8.dp)
             ) {
-                items(messages) { msg ->
-                    MessageBubble(message = msg)
+                items(messages, key = { it.id }) { msg ->
+                    MessageBubble(
+                        message = msg,
+                        onRecipeSaveToggle = { recipeToToggle, shouldSave ->
+                            coroutineScope.launch {
+                                // Ensure userIdAsBearerToken is available before making the API call
+                                if (userIdAsBearerToken == null) {
+                                    Log.e("ChatScreenRecipe", "Cannot save/unsave recipe: User ID as Bearer token is null.")
+                                    // Revert UI state if action can't proceed
+                                    val msgIndex = messages.indexOfFirst { it.id == msg.id }
+                                    if (msgIndex != -1) messages[msgIndex] = msg.copy(isRecipeSavedInMemory = !shouldSave)
+                                    return@launch
+                                }
+
+                                if (shouldSave) {
+                                    try {
+                                        // --- CRITICAL CHANGE: Pass userIdAsBearerToken here ---
+                                        val response = ApiClient.instance.createRecipe(userIdAsBearerToken!!, recipeToToggle)
+                                        // --- End CRITICAL CHANGE ---
+                                        if (response.isSuccessful) {
+                                            val newRecipeId = response.body()?.recipeId
+                                            Log.i("ChatScreenRecipe", "Recipe ${recipeToToggle.name} saved successfully with ID: $newRecipeId using UID as bearer token.")
+                                            val msgIndex = messages.indexOfFirst { it.id == msg.id }
+                                            if (msgIndex != -1) {
+                                                val updatedRecipe = recipeToToggle.copy(id = newRecipeId)
+                                                messages[msgIndex] = msg.copy(recipe = updatedRecipe, isRecipeSavedInMemory = true)
+                                            }
+                                        } else {
+                                            Log.e("ChatScreenRecipe", "Error saving recipe: ${response.code()} - ${response.errorBody()?.string()}")
+                                            val msgIndex = messages.indexOfFirst { it.id == msg.id }
+                                            if (msgIndex != -1) messages[msgIndex] = msg.copy(isRecipeSavedInMemory = false)
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("ChatScreenRecipe", "Exception saving recipe: ${e.message}", e)
+                                        val msgIndex = messages.indexOfFirst { it.id == msg.id }
+                                        if (msgIndex != -1) messages[msgIndex] = msg.copy(isRecipeSavedInMemory = false)
+                                    }
+                                } else {
+                                    recipeToToggle.id?.let { recipeId ->
+                                        try {
+                                            // --- CRITICAL CHANGE: Pass userIdAsBearerToken here ---
+                                            val response = ApiClient.instance.deleteRecipe(userIdAsBearerToken!!, recipeId.toString())
+                                            // --- End CRITICAL CHANGE ---
+                                            if (response.isSuccessful) {
+                                                Log.i("ChatScreenRecipe", "Recipe ID $recipeId unsaved successfully using UID as bearer token.")
+                                                val msgIndex = messages.indexOfFirst { it.id == msg.id }
+                                                if (msgIndex != -1) {
+                                                    messages[msgIndex] = msg.copy(isRecipeSavedInMemory = false)
+                                                }
+                                            } else {
+                                                Log.e("ChatScreenRecipe", "Error unsaving recipe: ${response.code()} - ${response.errorBody()?.string()}")
+                                                val msgIndex = messages.indexOfFirst { it.id == msg.id }
+                                                if (msgIndex != -1) messages[msgIndex] = msg.copy(isRecipeSavedInMemory = true)
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.e("ChatScreenRecipe", "Exception unsaving recipe: ${e.message}", e)
+                                            val msgIndex = messages.indexOfFirst { it.id == msg.id }
+                                            if (msgIndex != -1) messages[msgIndex] = msg.copy(isRecipeSavedInMemory = true)
+                                        }
+                                    } ?: run {
+                                        Log.w("ChatScreenRecipe", "Cannot unsave recipe, ID is null.")
+                                        val msgIndex = messages.indexOfFirst { it.id == msg.id }
+                                        if (msgIndex != -1) messages[msgIndex] = msg.copy(isRecipeSavedInMemory = true)
+                                    }
+                                }
+                            }
+                        }
+                    )
                 }
                 if (isBotTyping) {
                     item {
                         WritingAnimation()
                     }
-                }}
-
-            // Desplaza automáticamente al final cuando se agregan mensajes
-            LaunchedEffect(messages.size) {
-                listState.scrollToItem(index = messages.size - 1, scrollOffset = Int.MAX_VALUE)
+                }
             }
-        }
-    }
 
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(index = messages.size - 1)
+            LaunchedEffect(messages.size) {
+                if (messages.isNotEmpty()) {
+                    listState.animateScrollToItem(index = messages.size - 1)
+                }
+            }
         }
     }
 }
@@ -245,12 +372,16 @@ fun WritingAnimation(modifier: Modifier = Modifier) {
     LottieAnimation(
         composition = composition,
         progress = { progress },
-        modifier = modifier.size(72.dp)
+        modifier = modifier
+            .size(72.dp)
+            .padding(start = 8.dp)
     )
 }
 
 @Preview
 @Composable
-fun AnimationTestScreen() {
-    WritingAnimation()
+fun ChatScreenPreview() {
+    MaterialTheme {
+        ChatScreen()
+    }
 }

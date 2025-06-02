@@ -1,129 +1,114 @@
 package dev.pedroayon.nutria.chat.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row // Added for HeartSwitch alignment
+import androidx.compose.foundation.layout.Spacer // Added for HeartSwitch alignment
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size // Added for HeartSwitch
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.Text // Added for debugging if needed
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.meetup.twain.MarkdownText
-import com.popovanton0.heartswitch.HeartSwitch
+import com.meetup.twain.MarkdownText // Ensure this dependency is present
+import com.popovanton0.heartswitch.HeartSwitch // Ensure this dependency is present
 import dev.pedroayon.nutria.auth.domain.model.MessageType
-import dev.pedroayon.nutria.auth.domain.model.Recipe
+import dev.pedroayon.nutria.common.model.Recipe // Use the common model Recipe
 import dev.pedroayon.nutria.chat.domain.model.ChatMessage
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
-
 
 @Composable
 fun MessageBubble(
     message: ChatMessage,
-    onRecipeSaveToggle: ((Recipe, Boolean) -> Unit)? = null
+    onRecipeSaveToggle: ((recipe: Recipe, shouldBeSaved: Boolean) -> Unit)? = null // Pass Recipe, not ChatMessage
 ) {
     val alignment = if (message.messageType == MessageType.USER) Alignment.CenterEnd else Alignment.CenterStart
 
     val bubbleColor = if (message.messageType == MessageType.USER)
         MaterialTheme.colorScheme.primary
     else
-        MaterialTheme.colorScheme.surface
+        MaterialTheme.colorScheme.surfaceVariant // Slightly different color for bot/recipe for contrast
 
-    val textColor = if (message.messageType == MessageType.USER)
-        if (isSystemInDarkTheme()) Color.Black else Color.White
-    else
-        MaterialTheme.colorScheme.onSurface
+    val textColor = if (message.messageType == MessageType.USER) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
-    // Handle parsing only if RECIPE
-    var parsedRecipe: Recipe? = null
-    val displayText = if (message.messageType == MessageType.RECIPE) {
-        try {
-            val json = Json { ignoreUnknownKeys = true }
-            val recipe = json.decodeFromString<Recipe>(message.text)
-            parsedRecipe = recipe
-            recipe.toString()
-        } catch (e: SerializationException) {
-            "Error displaying recipe: Invalid recipe format."
-        } catch (e: Exception) {
-            "An unexpected error occurred while displaying the recipe."
-        }
+    val recipeForBubble: Recipe? = if (message.messageType == MessageType.RECIPE) message.recipe else null
+
+    // The text to display. If it's a recipe and the recipe object exists, use its toString().
+    // Otherwise, use the message's plain text.
+    val displayText = if (message.messageType == MessageType.RECIPE && recipeForBubble != null) {
+        recipeForBubble.toString() // This uses the custom Markdown toString()
     } else {
         message.text
     }
 
     Box(
-        modifier = if (message.messageType == MessageType.USER) {
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .padding(start = 24.dp)
-        } else {
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .padding(end = 24.dp)
-        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .padding(
+                start = if (message.messageType == MessageType.USER) 64.dp else 8.dp, // Indent user messages more
+                end = if (message.messageType == MessageType.USER) 8.dp else 64.dp    // Indent bot messages more
+            ),
         contentAlignment = alignment
     ) {
-        if (message.messageType != MessageType.RECIPE) {
-            // 🟢 OLD LAYOUT for normal messages
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = bubbleColor,
-                tonalElevation = 2.dp
-            ) {
-                MarkdownText(
-                    markdown = displayText,
-                    modifier = Modifier.padding(12.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = textColor
-                )
-            }
-        } else {
-            // 🟡 RECIPE LAYOUT with HeartSwitch
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = bubbleColor,
-                tonalElevation = 2.dp
-            ) {
-                Column(
-                    modifier = Modifier.padding(8.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    if (parsedRecipe != null) {
-                        var isRecipeSaved by remember { mutableStateOf(false) }
+        Surface(
+            shape = RoundedCornerShape(16.dp), // Slightly more rounded
+            color = bubbleColor,
+            tonalElevation = 1.dp, // Softer elevation
+            shadowElevation = 1.dp
+        ) {
+            Column(modifier = Modifier.padding(if (recipeForBubble != null) 0.dp else 12.dp)) { // No padding for Column if recipe, recipe content has it
+                if (recipeForBubble != null) {
+                    // Recipe specific layout with HeartSwitch
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, end = 8.dp, start = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Optional: Recipe Name as a separate Text element if not prominent in toString()
+                        // Text(text = recipeForBubble.name, style = MaterialTheme.typography.titleMedium, color = textColor, modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.weight(1f)) // Pushes HeartSwitch to the end
+
+                        // Use message.isRecipeSavedInMemory for the initial state
+                        var isHeartChecked by remember(message.id, message.isRecipeSavedInMemory) {
+                            mutableStateOf(message.isRecipeSavedInMemory)
+                        }
 
                         HeartSwitch(
-                            checked = isRecipeSaved,
+                            checked = isHeartChecked,
                             onCheckedChange = { newState ->
-                                isRecipeSaved = newState
-                                onRecipeSaveToggle?.invoke(parsedRecipe!!, newState)
+                                isHeartChecked = newState
+                                onRecipeSaveToggle?.invoke(recipeForBubble, newState)
+                                Log.d("MessageBubble", "HeartSwitch toggled for ${recipeForBubble.name} to $newState")
                             },
-                            modifier = Modifier
-                                .padding(end = 4.dp)
-                        )
-                    }
-
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        MarkdownText(
-                            markdown = displayText,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp, start = 12.dp, end = 12.dp, bottom = 12.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = textColor
+                            modifier = Modifier.size(36.dp) // Adjust size as needed
                         )
                     }
                 }
+
+                // MarkdownText for all message types (USER, BOT, RECIPE content)
+                MarkdownText(
+                    markdown = displayText,
+                    modifier = Modifier.padding(
+                        start = 12.dp,
+                        end = 12.dp,
+                        bottom = 12.dp,
+                        top = if (recipeForBubble != null) 4.dp else 0.dp // Less top padding if heart switch is there
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = textColor,
+                    // Consider adding onLinkClicked for handling links in Markdown if any
+                )
             }
         }
     }

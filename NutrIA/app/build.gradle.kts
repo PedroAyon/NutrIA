@@ -77,6 +77,13 @@ dependencies {
     implementation("com.meetup:twain:0.2.2")
     implementation("com.github.popovanton0:heart-switch:1.6.0")
     implementation("com.airbnb.android:lottie-compose:6.0.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0") // Or latest version
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0") // For Gson
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0") // For logging
+    // For multipart requests if sending files
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
 
 }

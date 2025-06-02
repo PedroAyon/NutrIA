@@ -1,5 +1,7 @@
 package dev.pedroayon.nutria.common.ui.components
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.*
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import dev.pedroayon.nutria.R
@@ -40,6 +43,23 @@ fun CommonTopBar(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false }
             ) {
+                val context = LocalContext.current
+
+                DropdownMenuItem(
+                    text = { Text("Juego") },
+                    onClick = {
+                        showMenu = false
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://exact-secondly-perch.ngrok-free.app/"))
+                        context.startActivity(intent)
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.SportsEsports,
+                            contentDescription = null
+                        )
+                    }
+                )
+
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.logout)) },
                     onClick = {
@@ -53,6 +73,7 @@ fun CommonTopBar(
                         )
                     }
                 )
+
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
