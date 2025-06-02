@@ -32,7 +32,9 @@ Your task is to extract the user's **current intention** based on their last mes
 Chat history (from oldest to newest):
 ${formattedHistory}
 
-Based on the last user message: "${lastUserMessage.text}", what is the user's intention?`,
+Based on the last user message: "${lastUserMessage.text}", what is the user's intention?
+It is common to confuse a normal question with a request for a recipe, or a request for a recipe with a request for a shopping list.
+Do not generate a recipe or a shopping list unless the user explicitly asks for it.`,
           },
         ],
         system: `You are a classification agent in a nutrition and cooking assistant system.

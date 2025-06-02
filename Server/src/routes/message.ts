@@ -17,6 +17,7 @@ router.post(
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         res.status(401).json({ error: "Missing or invalid auth token" });
+        console.log(authHeader)
         return;
       }
       const token = authHeader.replace("Bearer ", "");
@@ -27,13 +28,27 @@ router.post(
 
       chatHistory = ChatHistory.parse(parsed);
 
+      // Parse shopping list from body (optional)
+      let shoppingList: string[] = [];
+      const rawShoppingList = req.body.shoppingList;
+      if (rawShoppingList) {
+        shoppingList =
+          typeof rawShoppingList === "string"
+            ? JSON.parse(rawShoppingList)
+            : rawShoppingList;
+      }
+
       const photos = (req.files as Express.Multer.File[]) || [];
       const photoPaths = photos.map((file) => path.resolve(file.path));
 
-      const response = await handleUserMessage(chatHistory, photoPaths, token);
+      const response = await handleUserMessage(
+        chatHistory,
+        photoPaths,
+        token,
+        shoppingList
+      );
 
       res.json(response);
-
     } catch (err: any) {
       console.error("Error:", err);
       res.status(400).json({ error: err.message || "Invalid request" });

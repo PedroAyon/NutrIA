@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { ZodError } from "zod";
 import { Recipe as zRecipe } from "../types";
 import { Recipe } from "../db/models/Recipe";
+import { User } from "../db/models/User";
 
 const router = express.Router();
 
@@ -16,7 +17,17 @@ router.post("/recipe", async (req: Request, res: Response) => {
 
   try {
     const parsedRecipe = zRecipe.parse(req.body);
+    console.log("Parsed recipe:", parsedRecipe);
 
+    // Verificar si el usuario existe, y crearlo si no
+    const [user, created] = await User.findOrCreate({
+      where: { id: token },
+    });
+
+    if (created) {
+      console.log(`User with ID ${token} was created`);
+    }
+    
     const newRecipe = await Recipe.create({
       userId: token,
       name: parsedRecipe.name,

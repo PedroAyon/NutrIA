@@ -1,4 +1,4 @@
-import { extractUserIntentionFlow } from "../ai";
+import { extractUserIntentionFlow, generateShoppingListFlow } from "../ai";
 import { ChatHistoryType, UserIntentionType, UserIntention } from "../types";
 import { handleGenerateRecipe } from "./generateRecipe";
 import { handleQuestion } from "./question";
@@ -7,7 +7,8 @@ import { extractIngredientsFromPictures } from "./picture";
 export async function handleUserMessage(
   chatHistory: ChatHistoryType,
   picturePaths: string[],
-  userId: string
+  userId: string,
+  shoppingList: string[] = []
 ) {
   try {
     const { intention } = await extractUserIntentionFlow({ chatHistory });
@@ -32,11 +33,17 @@ export async function handleUserMessage(
           userId
         );
       case UserIntentionType.ALTER_SHOPPING_LIST:
-        // Handle shopping list alteration
-        console.log("User wants to alter the shopping list.");
-        break;
+        return {
+          actionPerformed: UserIntentionType.ALTER_SHOPPING_LIST,
+          shoppingList: await generateShoppingListFlow({
+            chatHistory,
+            currentShoppingList: shoppingList,
+            userId,
+          }),
+        };
       case UserIntentionType.UNKNOWN:
         return {
+          actionPerformed: UserIntentionType.UNKNOWN,
           message: "I cannot respond to this message.",
         };
         break;

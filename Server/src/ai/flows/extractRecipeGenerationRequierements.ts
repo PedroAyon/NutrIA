@@ -74,6 +74,7 @@ Return the user requirements for recipe generation or modification. If modifying
     - "Create a vegetarian dinner using mushrooms and spinach."
     - "Modify 'Spicy Tofu Stir-fry' to be less spicy and add broccoli. Full recipe: <WRITE THE RECIPE OBJECT HERE>"
     - "Low-carb dessert using almond flour and stevia."
+You must answer in the user's language.
 `,
       });
       if (response == null) {

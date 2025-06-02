@@ -54,10 +54,10 @@ export const UserIntention = z.object({
     UserIntentionType.UNKNOWN,
   ])
     .describe(`The user's intention based on the chat history. Possible values are:
-      - ${UserIntentionType.GENERATE_RECIPE}: User wants to generate a recipe.
+      - ${UserIntentionType.GENERATE_RECIPE}: User wants to generate or create a recipe.
       - ${UserIntentionType.MODIFY_RECIPE}: User wants to modify an existing recipe.
       - ${UserIntentionType.ALTER_SHOPPING_LIST}: User wants to alter the shopping list.
-      - ${UserIntentionType.QUESTION}: User has a question about nutrition or cooking, or something else related to food, or asking about what the AI assitant can do.
+      - ${UserIntentionType.QUESTION}: User has a question about nutrition or cooking, or something else related to food, or asking about what the AI assitant can do, or just greeting the AI.
       - ${UserIntentionType.UNKNOWN}: User's intention is not clear or does not match any known actions. This is the default value if the user is not asking for something the AI is designed to do.`),
 });
 
