@@ -8,7 +8,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.meetup.twain.MarkdownText
-import dev.pedroayon.nutria.auth.domain.model.Recipe
+import dev.pedroayon.nutria.common.model.Recipe
 import dev.pedroayon.nutria.common.ui.components.CommonTopBar
 import kotlinx.serialization.json.Json
 

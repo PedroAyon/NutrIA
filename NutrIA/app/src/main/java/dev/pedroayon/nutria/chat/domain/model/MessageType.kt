@@ -1,4 +1,4 @@
-package dev.pedroayon.nutria.auth.domain.model
+package dev.pedroayon.nutria.chat.domain.model
 
 enum class MessageType {
     USER,

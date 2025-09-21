@@ -1,6 +1,5 @@
 package dev.pedroayon.nutria.chat.domain.model
 
-import dev.pedroayon.nutria.auth.domain.model.MessageType
 import dev.pedroayon.nutria.common.model.Recipe // Our new Recipe model
 import java.util.UUID
 

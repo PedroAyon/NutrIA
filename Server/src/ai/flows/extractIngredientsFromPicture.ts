@@ -29,7 +29,8 @@ Your task is to extract all visible ingredients from the image. Follow these ins
 - If quantity or unit is unclear, just mention the ingredient name.
 - Do not fabricate or guess items. If unsure, omit them.
 
-Return only the ingredients in a structured list.`,
+Return only the ingredients in a structured list.
+Answer in Spanish.`,
           },
         ],
         system: `You are a visual ingredient extraction assistant. Your job is to analyze images of ingredients

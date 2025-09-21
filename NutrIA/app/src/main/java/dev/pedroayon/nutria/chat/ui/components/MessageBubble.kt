@@ -1,7 +1,6 @@
 package dev.pedroayon.nutria.chat.ui.components
 
 import android.util.Log
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row // Added for HeartSwitch alignment
@@ -12,15 +11,13 @@ import androidx.compose.foundation.layout.size // Added for HeartSwitch
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text // Added for debugging if needed
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.meetup.twain.MarkdownText // Ensure this dependency is present
 import com.popovanton0.heartswitch.HeartSwitch // Ensure this dependency is present
-import dev.pedroayon.nutria.auth.domain.model.MessageType
+import dev.pedroayon.nutria.chat.domain.model.MessageType
 import dev.pedroayon.nutria.common.model.Recipe // Use the common model Recipe
 import dev.pedroayon.nutria.chat.domain.model.ChatMessage
 

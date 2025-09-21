@@ -53,7 +53,15 @@ ${JSON.stringify(userSavedRecipes, null, 2)}
 
 Based on the latest user message: "${lastUserMessage.text}", generate a fully updated shopping list as a list of strings.
 
-Return ONLY the updated shopping list. Do NOT explain or include extra text.`,
+Return ONLY the updated shopping list. 
+Do NOT remove any item in the shopping list unless the user explicitly asks to remove it.
+Just add new items that the user wants to add to the shopping list.
+If the user asks to remove one or more items, remove them from the shopping list.
+Do NOT explain or include extra text.
+If you can determine the amount of each item, include it in the shopping list, in the same string as the item
+Example: two tomatoes, 1 liter of milk, etc.
+Answer in spanish.
+`,
           },
         ],
         system: `You are a utility AI in a multiagent system. Your job is to return an updated shopping list based on user intent, chat history, and saved recipes. Only return the final list of items.`,
@@ -62,11 +70,11 @@ Return ONLY the updated shopping list. Do NOT explain or include extra text.`,
         },
       });
 
-      if (!output) {
-        throw new Error("Failed to generate updated shopping list.");
-      }
+          if (!output) {
+            throw new Error("Failed to generate updated shopping list.");
+          }
 
-      return output;
+          return output;
+        }
+      );
     }
-  );
-}

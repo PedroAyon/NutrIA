@@ -30,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +53,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import dev.pedroayon.nutria.R
-import dev.pedroayon.nutria.auth.domain.model.MessageType
+import dev.pedroayon.nutria.chat.domain.model.MessageType
 import dev.pedroayon.nutria.chat.domain.model.ChatMessage
 import dev.pedroayon.nutria.chat.domain.model.Message
 import dev.pedroayon.nutria.chat.domain.model.MessageRole
@@ -69,7 +68,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
@@ -551,7 +549,7 @@ private suspend fun handleImageUpload(
 
         } catch (e: Exception) {
             Log.e("ChatScreenAPI", "Error processing image(s) for upload: ${e.message}", e)
-            messages.add(ChatMessage(text = "Lo siento, no pude procesar la(s) imagen(es).", messageType = dev.pedroayon.nutria.auth.domain.model.MessageType.BOT))
+            messages.add(ChatMessage(text = "Lo siento, no pude procesar la(s) imagen(es).", messageType = MessageType.BOT))
         } finally {
             onSetBotTyping(false) // Call the lambda
         }
@@ -570,7 +568,7 @@ private suspend fun sendMessageToBot(
 ) {
     if (userIdAsBearerToken == null) {
         Log.e("ChatScreenAPI", "Cannot send message: User ID as Bearer token is null.")
-        messages.add(ChatMessage(text = "Lo siento, no pude autenticarte. Por favor, reinicia la app.", messageType = dev.pedroayon.nutria.auth.domain.model.MessageType.BOT))
+        messages.add(ChatMessage(text = "Lo siento, no pude autenticarte. Por favor, reinicia la app.", messageType = MessageType.BOT))
         onSetBotTyping(false) // Call the lambda
         return
     }
@@ -598,7 +596,7 @@ private suspend fun sendMessageToBot(
                 if (botResponse.recipe != null) {
                     val recipeMessage = ChatMessage(
                         text = botResponse.recipe.toString(),
-                        messageType = dev.pedroayon.nutria.auth.domain.model.MessageType.RECIPE,
+                        messageType = MessageType.RECIPE,
                         recipe = botResponse.recipe
                     )
                     messages.add(recipeMessage)
@@ -609,11 +607,11 @@ private suspend fun sendMessageToBot(
                     shoppingListManager.saveShoppingList(botResponse.shoppingList) // Use the passed manager
                     val shoppingListText = "Tu lista de compras actualizada:\n" +
                             botResponse.shoppingList.joinToString("\n") { "- $it" }
-                    messages.add(ChatMessage(text = shoppingListText, messageType = dev.pedroayon.nutria.auth.domain.model.MessageType.BOT))
+                    messages.add(ChatMessage(text = shoppingListText, messageType = MessageType.BOT))
                     if (botMessageTextForApi == null) botMessageTextForApi = shoppingListText else botMessageTextForApi += "\n" + shoppingListText
                 }
                 if (botResponse.message != null) {
-                    messages.add(ChatMessage(text = botResponse.message, messageType = dev.pedroayon.nutria.auth.domain.model.MessageType.BOT))
+                    messages.add(ChatMessage(text = botResponse.message, messageType = MessageType.BOT))
                     if (botMessageTextForApi == null) botMessageTextForApi = botResponse.message else botMessageTextForApi += "\n" + botResponse.message
                 }
 
@@ -631,12 +629,12 @@ private suspend fun sendMessageToBot(
         } else {
             val errorBody = response.errorBody()?.string() ?: "Unknown error"
             Log.e("ChatScreenAPI", "Error sending message: ${response.code()} - $errorBody")
-            messages.add(ChatMessage(text = "Lo siento, ocurrió un error al procesar tu solicitud. Código: ${response.code()}", messageType = dev.pedroayon.nutria.auth.domain.model.MessageType.BOT))
+            messages.add(ChatMessage(text = "Lo siento, ocurrió un error al procesar tu solicitud. Código: ${response.code()}", messageType = MessageType.BOT))
             apiChatHistory.add(Message(id = apiMessageIdCounter.getAndIncrement(), role = MessageRole.ASSISTANT, text = "Error response from server: $errorBody"))
         }
     } catch (e: Exception) {
         Log.e("ChatScreenAPI", "Exception sending message: ${e.message}", e)
-        messages.add(ChatMessage(text = "Lo siento, no pude conectarme. Verifica tu conexión.", messageType = dev.pedroayon.nutria.auth.domain.model.MessageType.BOT))
+        messages.add(ChatMessage(text = "Lo siento, no pude conectarme. Verifica tu conexión.", messageType = MessageType.BOT))
     } finally {
         onSetBotTyping(false) // Call the lambda
     }

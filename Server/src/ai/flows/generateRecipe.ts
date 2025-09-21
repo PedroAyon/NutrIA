@@ -25,7 +25,7 @@ export function defineGenerateRecipeFlow(aiInstance: any) {
       const { output } = await aiInstance.generate({
         prompt: [
           {
-            text: `Generate a single food recipe. User Requierements:\n${requirements}`,
+            text: `Generate a single food recipe. User Requierements:\n${requirements}\nImportant: answer in spanish!`,
           },
         ],
         system:
